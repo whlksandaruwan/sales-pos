@@ -1,0 +1,21 @@
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+COPY package.json ./
+COPY apps/frontend-react/package.json apps/frontend-react/
+
+RUN npm install --omit=dev --workspace apps/frontend-react
+
+COPY . .
+
+WORKDIR /app/apps/frontend-react
+
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/apps/frontend-react/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+
+

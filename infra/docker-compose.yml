@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: bookshop_pos
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfiles/Dockerfile.backend
+    depends_on:
+      - mysql
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://root:rootpassword@mysql:3306/bookshop_pos
+      JWT_ACCESS_SECRET: changeme-access
+      JWT_REFRESH_SECRET: changeme-refresh
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfiles/Dockerfile.frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE_URL: http://backend:4000
+      VITE_WS_URL: http://backend:4000
+    ports:
+      - "5173:80"
+
+  print-agent:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfiles/Dockerfile.print-agent
+    environment:
+      PRINT_AGENT_HTTP_PORT: 4100
+      PRINT_AGENT_WS_PORT: 4101
+    ports:
+      - "4100:4100"
+      - "4101:4101"
+
+volumes:
+  mysql_data:
+
+

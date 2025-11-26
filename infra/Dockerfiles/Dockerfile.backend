@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+COPY apps/backend-nest/package.json apps/backend-nest/
+
+RUN npm install --omit=dev --workspace apps/backend-nest
+
+COPY . .
+
+WORKDIR /app/apps/backend-nest
+
+RUN npm run build
+
+EXPOSE 4000
+
+CMD ["node", "dist/main.js"]
+
+

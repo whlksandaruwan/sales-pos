@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+COPY tools/print-agent/package.json tools/print-agent/
+
+RUN npm install --omit=dev --workspace tools/print-agent
+
+COPY . .
+
+WORKDIR /app/tools/print-agent
+
+EXPOSE 4100 4101
+
+CMD ["npm", "run", "start"]
+
+

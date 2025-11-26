@@ -1,0 +1,27 @@
+{
+  "name": "bookshop-pos-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "tools/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm --workspace apps/backend-nest run start:dev",
+    "dev:frontend": "npm --workspace apps/frontend-react run dev",
+    "dev:print-agent": "npm --workspace tools/print-agent run dev",
+    "build": "npm run build:backend && npm run build:frontend && npm run build:print-agent",
+    "build:backend": "npm --workspace apps/backend-nest run build",
+    "build:frontend": "npm --workspace apps/frontend-react run build",
+    "build:print-agent": "npm --workspace tools/print-agent run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "npm --workspace apps/backend-nest run test",
+    "test:frontend": "npm --workspace apps/frontend-react run test",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "npm --workspace apps/backend-nest run lint",
+    "lint:frontend": "npm --workspace apps/frontend-react run lint",
+    "e2e": "npm --workspace tests/e2e run test"
+  }
+}
+
+
