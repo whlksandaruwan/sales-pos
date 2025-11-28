@@ -8,21 +8,19 @@ app.use(express.json());
 
 app.post('/print/receipt', async (req, res) => {
   const job = req.body;
-  // In a real implementation, translate job to ESC/POS and send to printer
-  console.log('ESC/POS receipt job', job);
+  console.log('ESC/POS receipt job (mock only)', job);
+  // This is a mock; real USB printing must be wired per device/driver.
   res.json({ success: true });
 });
 
 app.post('/print/label', async (req, res) => {
   const job = req.body;
-  // In a real implementation, translate job to ZPL and send to printer
-  console.log('ZPL label job', job);
+  console.log('ZPL label job (mock only)', job);
   res.json({ success: true });
 });
 
 app.post('/cash-drawer/open', async (_req, res) => {
-  // In a real implementation, send pulse command to cash drawer
-  console.log('Open cash drawer');
+  console.log('Open cash drawer (mock only)');
   res.json({ success: true });
 });
 
@@ -46,5 +44,4 @@ httpServer.listen(config.httpPort, () => {
 
 io.listen(config.wsPort);
 console.log(`Print agent WS listening on ${config.wsPort}`);
-
 

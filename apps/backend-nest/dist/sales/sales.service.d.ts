@@ -5,22 +5,22 @@ export declare class SalesService {
     constructor(prisma: PrismaService);
     create(userId: number, storeId: number, dto: CreateSaleDto): Promise<{
         id: number;
-        createdAt: Date;
-        userId: number;
         storeId: number;
-        total: import("@prisma/client/runtime/library").Decimal;
-        discount: import("@prisma/client/runtime/library").Decimal;
+        userId: number;
+        createdAt: Date;
         terminalId: number | null;
         customerId: number | null;
+        total: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
     }>;
     findOne(id: number): Promise<({
         items: {
-            id: number;
             price: import("@prisma/client/runtime/library").Decimal;
-            discount: import("@prisma/client/runtime/library").Decimal;
-            saleId: number;
+            id: number;
             productId: number;
             quantity: number;
+            discount: import("@prisma/client/runtime/library").Decimal;
+            saleId: number;
             subtotal: import("@prisma/client/runtime/library").Decimal;
         }[];
         payments: {
@@ -32,12 +32,25 @@ export declare class SalesService {
         }[];
     } & {
         id: number;
-        createdAt: Date;
-        userId: number;
         storeId: number;
-        total: import("@prisma/client/runtime/library").Decimal;
-        discount: import("@prisma/client/runtime/library").Decimal;
+        userId: number;
+        createdAt: Date;
         terminalId: number | null;
         customerId: number | null;
+        total: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
     }) | null>;
+    refund(originalSaleId: number, userId: number, storeId: number, items: {
+        productId: number;
+        quantity: number;
+    }[]): Promise<{
+        id: number;
+        storeId: number;
+        userId: number;
+        createdAt: Date;
+        terminalId: number | null;
+        customerId: number | null;
+        total: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
+    }>;
 }

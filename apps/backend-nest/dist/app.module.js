@@ -19,6 +19,9 @@ const reports_module_1 = require("./reports/reports.module");
 const dashboard_module_1 = require("./dashboard/dashboard.module");
 const prisma_module_1 = require("./prisma/prisma.module");
 const stores_module_1 = require("./stores/stores.module");
+const customers_module_1 = require("./customers/customers.module");
+const categories_module_1 = require("./categories/categories.module");
+const stock_module_1 = require("./stock/stock.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -41,6 +44,9 @@ exports.AppModule = AppModule = __decorate([
             reports_module_1.ReportsModule,
             dashboard_module_1.DashboardModule,
             stores_module_1.StoresModule,
+            customers_module_1.CustomersModule,
+            categories_module_1.CategoriesModule,
+            stock_module_1.StockModule,
         ],
     })
 ], AppModule);

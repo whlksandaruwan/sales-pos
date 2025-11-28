@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const sales_service_1 = require("./sales.service");
 const create_sale_dto_1 = require("./dto/create-sale.dto");
+const refund_sale_dto_1 = require("./dto/refund-sale.dto");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const roles_guard_1 = require("../auth/roles.guard");
 const roles_decorator_1 = require("../auth/roles.decorator");
@@ -33,6 +34,11 @@ let SalesController = class SalesController {
     }
     async getById(id) {
         return this.salesService.findOne(Number(id));
+    }
+    async refund(req, id, dto) {
+        const user = req.user;
+        const storeId = 1;
+        return this.salesService.refund(Number(id), user.id, storeId, dto.items);
     }
 };
 exports.SalesController = SalesController;
@@ -52,6 +58,16 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], SalesController.prototype, "getById", null);
+__decorate([
+    (0, common_1.Post)(':id/refund'),
+    (0, roles_decorator_1.Roles)(roles_enum_1.RoleEnum.Admin, roles_enum_1.RoleEnum.Manager, roles_enum_1.RoleEnum.Cashier),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, refund_sale_dto_1.RefundSaleDto]),
+    __metadata("design:returntype", Promise)
+], SalesController.prototype, "refund", null);
 exports.SalesController = SalesController = __decorate([
     (0, swagger_1.ApiTags)('Sales'),
     (0, swagger_1.ApiBearerAuth)(),

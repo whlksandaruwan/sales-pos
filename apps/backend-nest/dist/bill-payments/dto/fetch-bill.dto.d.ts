@@ -1,7 +1,6 @@
 export declare enum BillProvider {
     Electricity = "electricity",
-    Water = "water",
-    Mobile = "mobile"
+    Water = "water"
 }
 export declare class FetchBillDto {
     provider: BillProvider;

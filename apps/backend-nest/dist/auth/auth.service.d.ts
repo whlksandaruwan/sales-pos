@@ -10,12 +10,12 @@ export declare class AuthService {
             name: string;
         };
     } & {
-        id: number;
-        createdAt: Date;
         email: string;
         passwordHash: string;
         fullName: string;
+        createdAt: Date;
         updatedAt: Date;
+        id: number;
         roleId: number;
     }>;
     login(userId: number, email: string): Promise<{

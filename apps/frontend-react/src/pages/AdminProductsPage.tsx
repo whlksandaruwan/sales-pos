@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import bwipjs from 'bwip-js';
 
 export default function AdminProductsPage() {
   const [query, setQuery] = useState('');
@@ -8,6 +9,9 @@ export default function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [bulkText, setBulkText] = useState('');
   const [showBulk, setShowBulk] = useState(false);
+  const [stockProduct, setStockProduct] = useState<any | null>(null);
+  const [stockQuantity, setStockQuantity] = useState('');
+  const [barcodeProduct, setBarcodeProduct] = useState<any | null>(null);
 
   const [form, setForm] = useState({
     name: '',
@@ -18,9 +22,31 @@ export default function AdminProductsPage() {
     unit: 'pcs',
     reorderThreshold: '0',
     barcode: '',
+    categoryId: '',
   });
 
   const qc = useQueryClient();
+
+  useEffect(() => {
+    if (!barcodeProduct) return;
+    const canvas = document.getElementById(
+      'barcode-canvas',
+    ) as HTMLCanvasElement | null;
+    if (!canvas) return;
+    try {
+      // @ts-ignore
+      bwipjs.toCanvas(canvas, {
+        bcid: 'code128',
+        text: String(barcodeProduct.barcode || barcodeProduct.sku),
+        scale: 3,
+        height: 10,
+        includetext: true,
+        textxalign: 'center',
+      });
+    } catch (e) {
+      console.error('Failed to render barcode', e);
+    }
+  }, [barcodeProduct]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['products', query],
@@ -28,6 +54,14 @@ export default function AdminProductsPage() {
       const res = await api.get('/products', {
         params: query ? { q: query } : undefined,
       });
+      return res.data;
+    },
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await api.get('/categories');
       return res.data;
     },
   });
@@ -43,6 +77,7 @@ export default function AdminProductsPage() {
         unit: form.unit,
         reorderThreshold: Number(form.reorderThreshold) || 0,
         barcode: form.barcode || undefined,
+        categoryId: form.categoryId ? Number(form.categoryId) : undefined,
       };
       if (editingProduct) {
         await api.put(`/products/${editingProduct.id}`, payload);
@@ -131,6 +166,7 @@ export default function AdminProductsPage() {
       unit: 'pcs',
       reorderThreshold: '0',
       barcode: '',
+      categoryId: '',
     });
     setShowForm(true);
   }
@@ -146,9 +182,30 @@ export default function AdminProductsPage() {
       unit: p.unit || 'pcs',
       reorderThreshold: String(p.reorderThreshold ?? '0'),
       barcode: p.barcode || '',
+      categoryId: String(p.categoryId ?? ''),
     });
     setShowForm(true);
   }
+
+  const adjustStock = useMutation({
+    mutationFn: async () => {
+      if (!stockProduct) return;
+      await api.post('/stock/adjust', {
+        productId: stockProduct.id,
+        storeId: 1,
+        quantity: Number(stockQuantity),
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['products'] });
+      setStockProduct(null);
+      setStockQuantity('');
+      alert('Stock adjusted successfully');
+    },
+    onError: (err: any) => {
+      alert(err?.response?.data?.message || 'Failed to adjust stock');
+    },
+  });
 
   function handleFormSubmit(e: FormEvent) {
     e.preventDefault();
@@ -192,6 +249,76 @@ export default function AdminProductsPage() {
           </button>
         </div>
       </div>
+
+      {/* Barcode Print Modal */}
+      {barcodeProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+            <h2 className="text-xl font-bold text-slate-800 mb-3 text-center">
+              Barcode Label
+            </h2>
+            <p className="text-sm text-slate-600 text-center mb-2">
+              {barcodeProduct.name} ({barcodeProduct.sku})
+            </p>
+            <div className="border border-slate-200 rounded-lg p-3 flex items-center justify-center mb-4">
+              <canvas id="barcode-canvas" />
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const canvas = document.getElementById(
+                    'barcode-canvas',
+                  ) as HTMLCanvasElement | null;
+                  if (!canvas) {
+                    alert('Barcode not ready yet');
+                    return;
+                  }
+                  const dataUrl = canvas.toDataURL('image/png');
+                  const w = window.open('', '_blank');
+                  if (!w) return;
+                  w.document.write(`<!DOCTYPE html>
+                    <html>
+                    <head>
+                      <title>Barcode</title>
+                      <style>
+                        @page { size: 80mm 40mm; margin: 0; }
+                        body {
+                          margin: 0;
+                          display: flex;
+                          justify-content: center;
+                          align-items: center;
+                          height: 100vh;
+                        }
+                        img { width: 90%; }
+                      </style>
+                    </head>
+                    <body>
+                      <img src="${dataUrl}" />
+                    </body>
+                    </html>`);
+                  w.document.close();
+                  w.focus();
+                  setTimeout(() => {
+                    w.print();
+                    w.close();
+                  }, 300);
+                }}
+                className="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-2.5 rounded-lg text-sm font-semibold"
+              >
+                Print Label
+              </button>
+              <button
+                type="button"
+                onClick={() => setBarcodeProduct(null)}
+                className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-2.5 rounded-lg text-sm font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex-1 flex flex-col min-h-0">
         {isLoading ? (
@@ -269,6 +396,23 @@ export default function AdminProductsPage() {
                     </span>
                     <button
                       type="button"
+                      onClick={() => {
+                        setStockProduct(p);
+                        setStockQuantity('');
+                      }}
+                      className="text-xs px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-semibold text-slate-700"
+                    >
+                      Stock
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBarcodeProduct(p)}
+                      className="text-xs px-2 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 font-semibold text-purple-700"
+                    >
+                      🖨 Barcode
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => openEditForm(p)}
                       className="text-xs px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-semibold text-slate-700"
                     >
@@ -293,6 +437,70 @@ export default function AdminProductsPage() {
           </div>
         )}
       </div>
+
+      {/* Stock Adjustment Modal */}
+      {stockProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">
+              Adjust Stock
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Product
+                </label>
+                <div className="text-lg font-bold text-slate-900">
+                  {stockProduct.name}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Current Stock
+                </label>
+                <div className="text-2xl font-bold text-emerald-600">
+                  {stockProduct.stock?.reduce(
+                    (s: number, st: any) => s + st.quantity,
+                    0,
+                  ) ?? 0}{' '}
+                  units
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Adjust By (+ to add, - to remove)
+                </label>
+                <input
+                  type="number"
+                  value={stockQuantity}
+                  onChange={(e) => setStockQuantity(e.target.value)}
+                  className="w-full border-2 border-slate-300 rounded-lg px-4 py-3 text-lg font-semibold text-center focus:outline-none focus:border-blue-500"
+                  placeholder="e.g. +10 or -5"
+                  autoFocus
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                  Positive to add stock, negative to remove
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => adjustStock.mutate()}
+                  disabled={!stockQuantity || adjustStock.isPending}
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50"
+                >
+                  {adjustStock.isPending ? 'Adjusting...' : 'Adjust Stock'}
+                </button>
+                <button
+                  onClick={() => setStockProduct(null)}
+                  className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3 rounded-lg font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Product Form Drawer */}
       {showForm && (
@@ -349,6 +557,25 @@ export default function AdminProductsPage() {
                     className="w-full border-2 border-slate-300 rounded-lg px-3 py-2"
                   />
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1">
+                  Category
+                </label>
+                <select
+                  value={form.categoryId}
+                  onChange={(e) =>
+                    setForm({ ...form, categoryId: e.target.value })
+                  }
+                  className="w-full border-2 border-slate-300 rounded-lg px-3 py-2"
+                >
+                  <option value="">Select Category</option>
+                  {categories?.map((cat: any) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

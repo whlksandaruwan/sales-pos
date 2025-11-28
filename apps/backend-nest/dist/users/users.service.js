@@ -32,7 +32,13 @@ let UsersService = class UsersService {
         });
     }
     async findAll() {
-        return this.prisma.user.findMany({ include: { role: true } });
+        const users = await this.prisma.user.findMany({ include: { role: true } });
+        return users.map((u) => ({
+            id: u.id,
+            email: u.email,
+            fullName: u.fullName,
+            role: u.role?.name || 'Unknown',
+        }));
     }
 };
 exports.UsersService = UsersService;

@@ -5,8 +5,8 @@ export declare class DashboardController {
     lowStock(): Promise<({
         stock: {
             id: number;
-            productId: number;
             storeId: number;
+            productId: number;
             quantity: number;
         }[];
     } & {
@@ -15,11 +15,11 @@ export declare class DashboardController {
         sku: string;
         isbn: string | null;
         barcode: string;
-        categoryId: number | null;
-        supplierId: number | null;
         price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
+        categoryId: number | null;
+        supplierId: number | null;
     })[]>;
 }

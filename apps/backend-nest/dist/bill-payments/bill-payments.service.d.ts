@@ -13,12 +13,12 @@ export declare class BillPaymentsService {
     }>;
     pay(userId: number, storeId: number, dto: PayBillDto, idempotencyKey?: string): Promise<{
         id: number;
-        createdAt: Date;
+        storeId: number;
         provider: string;
         reference: string;
         amount: import("@prisma/client/runtime/library").Decimal;
         status: string;
         userId: number;
-        storeId: number;
+        createdAt: Date;
     }>;
 }

@@ -27,11 +27,17 @@ let ProductsController = class ProductsController {
     constructor(productsService) {
         this.productsService = productsService;
     }
+    async getAll(q) {
+        return this.productsService.findAll(q);
+    }
     async getByBarcode(code) {
         return this.productsService.findByBarcode(code);
     }
     async create(dto) {
         return this.productsService.create(dto);
+    }
+    async bulkCreate(dtos) {
+        return this.productsService.bulkCreate(dtos);
     }
     async update(id, dto) {
         return this.productsService.update(Number(id), dto);
@@ -44,6 +50,13 @@ let ProductsController = class ProductsController {
     }
 };
 exports.ProductsController = ProductsController;
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('q')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "getAll", null);
 __decorate([
     (0, common_1.Get)('by-barcode/:code'),
     __param(0, (0, common_1.Param)('code')),
@@ -59,6 +72,14 @@ __decorate([
     __metadata("design:paramtypes", [create_product_dto_1.CreateProductDto]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('bulk'),
+    (0, roles_decorator_1.Roles)(roles_enum_1.RoleEnum.Admin, roles_enum_1.RoleEnum.Manager),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "bulkCreate", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, roles_decorator_1.Roles)(roles_enum_1.RoleEnum.Admin, roles_enum_1.RoleEnum.Manager),

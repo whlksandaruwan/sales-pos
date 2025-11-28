@@ -28,9 +28,7 @@ export class SalesController {
   async create(@Req() req: any, @Body() dto: CreateSaleDto) {
     const user = req.user as { id: number };
     const storeId = 1; // In a full implementation, derive from terminal or user
-    const sale = await this.salesService.create(user.id, storeId, dto);
-    // In a full implementation, emit Socket.IO event and send print job
-    return sale;
+    return this.salesService.create(user.id, storeId, dto);
   }
 
   @Get(':id')

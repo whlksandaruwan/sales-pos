@@ -1,26 +1,27 @@
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
+import { RefundSaleDto } from './dto/refund-sale.dto';
 export declare class SalesController {
     private salesService;
     constructor(salesService: SalesService);
     create(req: any, dto: CreateSaleDto): Promise<{
         id: number;
-        createdAt: Date;
-        userId: number;
         storeId: number;
-        total: import("@prisma/client/runtime/library").Decimal;
-        discount: import("@prisma/client/runtime/library").Decimal;
+        userId: number;
+        createdAt: Date;
         terminalId: number | null;
         customerId: number | null;
+        total: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
     }>;
     getById(id: string): Promise<({
         items: {
-            id: number;
             price: import("@prisma/client/runtime/library").Decimal;
-            discount: import("@prisma/client/runtime/library").Decimal;
-            saleId: number;
+            id: number;
             productId: number;
             quantity: number;
+            discount: import("@prisma/client/runtime/library").Decimal;
+            saleId: number;
             subtotal: import("@prisma/client/runtime/library").Decimal;
         }[];
         payments: {
@@ -32,12 +33,22 @@ export declare class SalesController {
         }[];
     } & {
         id: number;
-        createdAt: Date;
-        userId: number;
         storeId: number;
-        total: import("@prisma/client/runtime/library").Decimal;
-        discount: import("@prisma/client/runtime/library").Decimal;
+        userId: number;
+        createdAt: Date;
         terminalId: number | null;
         customerId: number | null;
+        total: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
     }) | null>;
+    refund(req: any, id: string, dto: RefundSaleDto): Promise<{
+        id: number;
+        storeId: number;
+        userId: number;
+        createdAt: Date;
+        terminalId: number | null;
+        customerId: number | null;
+        total: import("@prisma/client/runtime/library").Decimal;
+        discount: import("@prisma/client/runtime/library").Decimal;
+    }>;
 }

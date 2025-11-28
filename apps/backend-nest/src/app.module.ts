@@ -11,6 +11,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { StoresModule } from './stores/stores.module';
 import { CustomersModule } from './customers/customers.module';
+import { CategoriesModule } from './categories/categories.module';
+import { StockModule } from './stock/stock.module';
+import { RefsModule } from './refs/refs.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { CustomersModule } from './customers/customers.module';
     DashboardModule,
     StoresModule,
     CustomersModule,
+    CategoriesModule,
+    StockModule,
+    RefsModule,
   ],
 })
 export class AppModule {}

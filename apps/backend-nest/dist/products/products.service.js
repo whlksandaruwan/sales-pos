@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductsService = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
 let ProductsService = class ProductsService {
     constructor(prisma) {
@@ -35,6 +36,26 @@ let ProductsService = class ProductsService {
             },
         });
     }
+    async bulkCreate(dtos) {
+        if (!dtos || dtos.length === 0)
+            return [];
+        return this.prisma.$transaction(dtos.map((dto) => {
+            const barcode = dto.barcode || this.generateBarcode();
+            return this.prisma.product.create({
+                data: {
+                    name: dto.name,
+                    sku: dto.sku,
+                    isbn: dto.isbn,
+                    barcode,
+                    categoryId: dto.categoryId,
+                    price: dto.price,
+                    cost: dto.cost,
+                    unit: dto.unit,
+                    reorderThreshold: dto.reorderThreshold,
+                },
+            });
+        }));
+    }
     async update(id, dto) {
         const existing = await this.prisma.product.findUnique({ where: { id } });
         if (!existing)
@@ -45,8 +66,21 @@ let ProductsService = class ProductsService {
         });
     }
     async delete(id) {
-        await this.prisma.product.delete({ where: { id } });
-        return { success: true };
+        await this.prisma.stock.deleteMany({ where: { productId: id } });
+        await this.prisma.barcodeHistory
+            .deleteMany({ where: { productId: id } })
+            .catch(() => undefined);
+        try {
+            await this.prisma.product.delete({ where: { id } });
+            return { success: true };
+        }
+        catch (err) {
+            if (err instanceof client_1.Prisma.PrismaClientKnownRequestError &&
+                err.code === 'P2003') {
+                throw new common_1.BadRequestException('Cannot delete this product because it is used in existing records (e.g. sales).');
+            }
+            throw err;
+        }
     }
     async findByBarcode(code) {
         const product = await this.prisma.product.findFirst({
@@ -55,6 +89,22 @@ let ProductsService = class ProductsService {
         if (!product)
             throw new common_1.NotFoundException('Product not found');
         return product;
+    }
+    async findAll(query) {
+        return this.prisma.product.findMany({
+            where: query
+                ? {
+                    OR: [
+                        { name: { contains: query } },
+                        { sku: { contains: query } },
+                        { isbn: { contains: query } },
+                        { barcode: { contains: query } },
+                    ],
+                }
+                : undefined,
+            include: { stock: true, category: true },
+            orderBy: { name: 'asc' },
+        });
     }
 };
 exports.ProductsService = ProductsService;

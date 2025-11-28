@@ -1,10 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSaleDto, PaymentMethod } from './dto/create-sale.dto';
 
 @Injectable()
 export class SalesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private http: HttpService,
+  ) {}
 
   async create(userId: number, storeId: number, dto: CreateSaleDto) {
     return this.prisma.$transaction(async (tx) => {
@@ -27,6 +32,8 @@ export class SalesService {
           customerId: dto.customerId,
           total,
           discount,
+          deliveryDate: dto.deliveryDate ? new Date(dto.deliveryDate) : undefined,
+          deliveryNote: dto.deliveryNote,
         },
       });
 
@@ -83,6 +90,46 @@ export class SalesService {
           data: dto as any,
         },
       });
+
+      const hasCash = dto.payments.some(
+        (p) => p.method === PaymentMethod.Cash && p.amount > 0,
+      );
+
+      const agentUrl =
+        process.env.PRINT_AGENT_URL || 'http://localhost:4100';
+
+      // Fire-and-forget receipt print
+      const receiptLines: string[] = [];
+      dto.items.forEach((item) => {
+        const lineTotal =
+          (item.price - (item.discount || 0)) * item.quantity;
+        receiptLines.push(
+          `${item.quantity} x Rs.${item.price.toFixed(
+            2,
+          )}  = Rs.${lineTotal.toFixed(2)}`,
+        );
+      });
+      receiptLines.push(`TOTAL: Rs.${total.toFixed(2)}`);
+
+      lastValueFrom(
+        this.http.post(`${agentUrl}/print/receipt`, {
+          title: 'Ahasna Sale Center',
+          lines: receiptLines,
+          footer: 'Software By INNOVATECH  0742256408',
+        }),
+      ).catch(() => undefined);
+
+      // After transaction, try to open cash drawer if there was any cash payment
+      if (hasCash) {
+        lastValueFrom(
+          this.http.post(`${agentUrl}/cash-drawer/open`, {
+            saleId: sale.id,
+            storeId,
+            userId,
+            total,
+          }),
+        ).catch(() => undefined);
+      }
 
       return sale;
     });

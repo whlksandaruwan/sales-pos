@@ -7,7 +7,9 @@ export declare class SaleItemDto {
 export declare enum PaymentMethod {
     Cash = "Cash",
     Card = "Card",
-    QR = "QR"
+    QR = "QR",
+    DigitalWallet = "DigitalWallet",
+    Credit = "Credit"
 }
 export declare class PaymentDto {
     method: PaymentMethod;

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -60,8 +65,27 @@ export class ProductsService {
   }
 
   async delete(id: number) {
-    await this.prisma.product.delete({ where: { id } });
-    return { success: true };
+    // First remove non-historical relations (stock, barcode history)
+    await this.prisma.stock.deleteMany({ where: { productId: id } });
+    await this.prisma.barcodeHistory
+      .deleteMany({ where: { productId: id } })
+      .catch(() => undefined);
+
+    try {
+      await this.prisma.product.delete({ where: { id } });
+      return { success: true };
+    } catch (err: any) {
+      // If there are still FK references (e.g. sales history), block deletion with a clear message
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2003'
+      ) {
+        throw new BadRequestException(
+          'Cannot delete this product because it is used in existing records (e.g. sales).',
+        );
+      }
+      throw err;
+    }
   }
 
   async findByBarcode(code: string) {
@@ -77,10 +101,10 @@ export class ProductsService {
       where: query
         ? {
             OR: [
-              { name: { contains: query, mode: 'insensitive' } },
-              { sku: { contains: query, mode: 'insensitive' } },
-              { isbn: { contains: query, mode: 'insensitive' } },
-              { barcode: { contains: query, mode: 'insensitive' } },
+              { name: { contains: query } },
+              { sku: { contains: query } },
+              { isbn: { contains: query } },
+              { barcode: { contains: query } },
             ],
           }
         : undefined,

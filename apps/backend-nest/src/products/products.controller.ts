@@ -63,8 +63,8 @@ export class ProductsController {
   @Post('print-sticker')
   @Roles(RoleEnum.Admin, RoleEnum.Manager)
   async printSticker(@Body() dto: PrintStickerDto) {
-    // In a full implementation this would dispatch to the print agent
-    return { success: true, job: { productIds: dto.productIds } };
+    // For now, just echo back; printing is handled by local print agent directly
+    return { success: true, productIds: dto.productIds };
   }
 }
 

@@ -13,12 +13,12 @@ export declare class JwtStrategy extends JwtStrategy_base {
             name: string;
         };
     } & {
-        id: number;
-        createdAt: Date;
         email: string;
         passwordHash: string;
         fullName: string;
+        createdAt: Date;
         updatedAt: Date;
+        id: number;
         roleId: number;
     }) | null>;
 }

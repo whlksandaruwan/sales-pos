@@ -10,12 +10,14 @@ type ExtraPayment = {
 
 export default function BillingPage() {
   const scanInputRef = useRef<HTMLInputElement | null>(null);
+  const receiptRef = useRef<HTMLDivElement>(null);
   const [scanCode, setScanCode] = useState('');
   const [cashTendered, setCashTendered] = useState('');
   const [discount, setDiscount] = useState('');
   const [customerId, setCustomerId] = useState('');
   const [extraPayments, setExtraPayments] = useState<ExtraPayment[]>([]);
-  const { items, addItem, increment, decrement, remove, clear } = useCartStore();
+  const [lastSale, setLastSale] = useState<any>(null);
+  const { items, addItem, increment, decrement, remove, clear} = useCartStore();
 
   useEffect(() => {
     scanInputRef.current?.focus();
@@ -120,17 +122,32 @@ export default function BillingPage() {
     }
 
     try {
-      const res = await api.post('/sales', {
+      const saleData = {
         items: items.map((i) => ({
           productId: i.productId,
           quantity: i.quantity,
           price: i.price,
+          name: i.name,
         })),
         discount: discountNum > 0 ? discountNum : undefined,
         customerId: customerIdNum,
         payments,
+        subtotal,
+        total,
+      };
+      
+      const res = await api.post('/sales', saleData);
+      
+      setLastSale({
+        ...res.data,
+        items: saleData.items,
+        payments: saleData.payments,
+        subtotal: saleData.subtotal,
+        total: saleData.total,
+        discount: discountNum,
+        createdAt: new Date().toISOString(),
       });
-      alert(`Sale #${res.data.id} completed!`);
+      
       clear();
       setCashTendered('');
       setDiscount('');
@@ -139,6 +156,125 @@ export default function BillingPage() {
     } catch (err: any) {
       alert(err?.response?.data?.message || 'Checkout failed');
     }
+  }
+  
+  function handlePrintReceipt() {
+    if (!receiptRef.current) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const receiptContent = receiptRef.current.innerHTML;
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Sales Receipt</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            @page {
+              size: 79mm 150mm;
+              margin: 0;
+            }
+            body {
+              font-family: 'Courier New', monospace;
+              width: 79mm;
+              padding: 2mm;
+              font-size: 9pt;
+              line-height: 1.2;
+            }
+            .receipt-container {
+              width: 100%;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 1px dashed #000;
+              padding-bottom: 1.5mm;
+              margin-bottom: 1.5mm;
+            }
+            .header h1 {
+              font-size: 12pt;
+              margin-bottom: 0.5mm;
+              font-weight: bold;
+            }
+            .header p {
+              font-size: 8pt;
+            }
+            .section {
+              margin-bottom: 1.5mm;
+            }
+            .section-title {
+              font-size: 7pt;
+              text-transform: uppercase;
+              margin-bottom: 0.3mm;
+              font-weight: bold;
+            }
+            .section-value {
+              font-size: 9pt;
+              font-weight: bold;
+            }
+            .items-table {
+              width: 100%;
+              font-size: 8pt;
+              margin: 1.5mm 0;
+            }
+            .items-table th {
+              text-align: left;
+              border-bottom: 1px solid #000;
+              padding-bottom: 0.5mm;
+              font-size: 7pt;
+            }
+            .items-table td {
+              padding: 0.5mm 0;
+            }
+            .text-right {
+              text-align: right;
+            }
+            .divider {
+              border-top: 1px dashed #000;
+              margin: 1.5mm 0;
+            }
+            .total-line {
+              font-size: 10pt;
+              font-weight: bold;
+              margin: 1mm 0;
+            }
+            .footer {
+              text-align: center;
+              font-size: 6pt;
+              margin-top: 2mm;
+              padding-top: 1.5mm;
+              border-top: 1px dashed #000;
+              line-height: 1.3;
+            }
+            .footer p {
+              margin-bottom: 0.5mm;
+            }
+            @media print {
+              body {
+                padding: 1.5mm;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${receiptContent}
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   }
 
   const cashAmount = Number(cashTendered) || 0;
@@ -150,6 +286,7 @@ export default function BillingPage() {
   const change = Math.max(0, totalPaid - total);
 
   return (
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full max-h-[calc(100vh-8rem)]">
       {/* Left: Cart Items */}
       <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col min-h-[400px] lg:min-h-0">
@@ -377,5 +514,140 @@ export default function BillingPage() {
         </button>
       </div>
     </div>
+
+    {lastSale && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
+          <div className="text-center mb-4">
+            <div className="text-5xl mb-2">✅</div>
+            <h2 className="text-2xl font-bold text-emerald-600">Sale Completed!</h2>
+            <p className="text-slate-600">Invoice #{lastSale.id}</p>
+          </div>
+          
+          <div className="space-y-2 text-sm mb-4">
+            <div className="flex justify-between">
+              <span className="text-slate-600">Subtotal:</span>
+              <span className="font-semibold">Rs.{lastSale.subtotal?.toFixed(2)}</span>
+            </div>
+            {lastSale.discount > 0 && (
+              <div className="flex justify-between">
+                <span className="text-slate-600">Discount:</span>
+                <span className="font-semibold text-red-600">-Rs.{lastSale.discount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-lg font-bold border-t pt-2">
+              <span>Total:</span>
+              <span className="text-emerald-600">Rs.{lastSale.total?.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrintReceipt}
+              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold"
+            >
+              🖨 Print Receipt
+            </button>
+            <button
+              onClick={() => setLastSale(null)}
+              className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 py-3 rounded-lg font-semibold"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {lastSale && (
+      <div ref={receiptRef} style={{ display: 'none' }}>
+        <div className="receipt-container">
+          <div className="header">
+            <h1>AHASNA SALE CENTER</h1>
+            <p>Sales Receipt</p>
+          </div>
+
+          <div className="section">
+            <div className="section-title">Invoice No</div>
+            <div className="section-value">#{lastSale.id}</div>
+          </div>
+
+          <div className="section">
+            <div className="section-title">Date</div>
+            <div className="section-value">
+              {new Date(lastSale.createdAt).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
+          </div>
+
+          <div className="divider"></div>
+
+          <table className="items-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th className="text-right">Qty</th>
+                <th className="text-right">Price</th>
+                <th className="text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lastSale.items?.map((item: any, idx: number) => (
+                <tr key={idx}>
+                  <td>{item.name}</td>
+                  <td className="text-right">{item.quantity}</td>
+                  <td className="text-right">{item.price.toFixed(2)}</td>
+                  <td className="text-right">{(item.price * item.quantity).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="divider"></div>
+
+          <div className="total-line" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>Subtotal:</span>
+            <span>Rs. {lastSale.subtotal?.toFixed(2)}</span>
+          </div>
+
+          {lastSale.discount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9pt' }}>
+              <span>Discount:</span>
+              <span>-Rs. {lastSale.discount.toFixed(2)}</span>
+            </div>
+          )}
+
+          <div className="total-line" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11pt' }}>
+            <span>TOTAL:</span>
+            <span>Rs. {lastSale.total?.toFixed(2)}</span>
+          </div>
+
+          <div className="divider"></div>
+
+          <div className="section">
+            <div className="section-title">Payment Method(s)</div>
+            {lastSale.payments?.map((payment: any, idx: number) => (
+              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8pt', marginBottom: '0.5mm' }}>
+                <span>{payment.method}:</span>
+                <span>Rs. {payment.amount.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="footer">
+            <p>Thank you for your purchase!</p>
+            <p>Please come again</p>
+            <p style={{ marginTop: '2mm' }}>Software By INNOVATECH</p>
+            <p>0742256408</p>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
   );
 }

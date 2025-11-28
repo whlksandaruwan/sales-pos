@@ -5,43 +5,80 @@ import { PrintStickerDto } from './dto/print-sticker.dto';
 export declare class ProductsController {
     private productsService;
     constructor(productsService: ProductsService);
-    getByBarcode(code: string): Promise<{
-        id: number;
+    getAll(q?: string): Promise<({
+        category: {
+            name: string;
+            id: number;
+        } | null;
+        stock: {
+            id: number;
+            productId: number;
+            storeId: number;
+            quantity: number;
+        }[];
+    } & {
         name: string;
         sku: string;
         isbn: string | null;
         barcode: string;
-        categoryId: number | null;
         price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
+        id: number;
+        categoryId: number | null;
+        supplierId: number | null;
+    })[]>;
+    getByBarcode(code: string): Promise<{
+        name: string;
+        sku: string;
+        isbn: string | null;
+        barcode: string;
+        price: import("@prisma/client/runtime/library").Decimal;
+        cost: import("@prisma/client/runtime/library").Decimal;
+        unit: string;
+        reorderThreshold: number;
+        id: number;
+        categoryId: number | null;
         supplierId: number | null;
     }>;
     create(dto: CreateProductDto): Promise<{
-        id: number;
         name: string;
         sku: string;
         isbn: string | null;
         barcode: string;
-        categoryId: number | null;
         price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
+        id: number;
+        categoryId: number | null;
         supplierId: number | null;
     }>;
-    update(id: string, dto: UpdateProductDto): Promise<{
-        id: number;
+    bulkCreate(dtos: CreateProductDto[]): Promise<{
         name: string;
         sku: string;
         isbn: string | null;
         barcode: string;
-        categoryId: number | null;
         price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
+        id: number;
+        categoryId: number | null;
+        supplierId: number | null;
+    }[]>;
+    update(id: string, dto: UpdateProductDto): Promise<{
+        name: string;
+        sku: string;
+        isbn: string | null;
+        barcode: string;
+        price: import("@prisma/client/runtime/library").Decimal;
+        cost: import("@prisma/client/runtime/library").Decimal;
+        unit: string;
+        reorderThreshold: number;
+        id: number;
+        categoryId: number | null;
         supplierId: number | null;
     }>;
     delete(id: string): Promise<{

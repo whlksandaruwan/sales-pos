@@ -16,6 +16,12 @@ type CustomerSaleItem = {
   quantity: number;
   price: number;
   subtotal: number;
+  product?: {
+    name: string;
+    sku: string;
+    isbn?: string | null;
+    barcode?: string | null;
+  };
 };
 
 type CustomerPayment = {
@@ -27,6 +33,8 @@ type CustomerPayment = {
 type CustomerSale = {
   id: number;
   createdAt: string;
+  deliveryDate?: string | null;
+  deliveryNote?: string | null;
   total: number;
   discount: number;
   items: CustomerSaleItem[];
@@ -42,6 +50,7 @@ export default function CustomersPage() {
     null,
   );
   const [settleAmount, setSettleAmount] = useState('');
+  const [selectedSale, setSelectedSale] = useState<CustomerSale | null>(null);
 
   const { data: customers } = useQuery({
     queryKey: ['customers'],
@@ -122,7 +131,6 @@ export default function CustomersPage() {
           </p>
         </div>
       </div>
-
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-4"
@@ -274,9 +282,20 @@ export default function CustomersPage() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:col-span-2 overflow-auto">
-            <h2 className="text-xl font-semibold text-slate-800 mb-3">
-              Purchase History
-            </h2>
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <h2 className="text-xl font-semibold text-slate-800">
+                Purchase & Delivery History
+              </h2>
+              {selectedSale && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedSale(null)}
+                  className="text-xs px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-semibold text-slate-700"
+                >
+                  Close Delivery Details
+                </button>
+              )}
+            </div>
             {historyLoading ? (
               <p className="text-sm text-slate-500">Loading history…</p>
             ) : !salesHistory || salesHistory.length === 0 ? (
@@ -290,11 +309,13 @@ export default function CustomersPage() {
                     <tr className="text-left">
                       <th className="py-2 px-3">Invoice #</th>
                       <th className="py-2 px-3">Date</th>
+                      <th className="py-2 px-3 hidden md:table-cell">Delivery Date</th>
                       <th className="py-2 px-3">Total (Rs.)</th>
                       <th className="py-2 px-3 hidden md:table-cell">Items</th>
                       <th className="py-2 px-3 hidden lg:table-cell">
                         Payments
                       </th>
+                      <th className="py-2 px-3 text-right">Delivery</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -306,6 +327,11 @@ export default function CustomersPage() {
                         <td className="py-2 px-3">#{sale.id}</td>
                         <td className="py-2 px-3">
                           {new Date(sale.createdAt).toLocaleString()}
+                        </td>
+                        <td className="py-2 px-3 hidden md:table-cell">
+                          {sale.deliveryDate
+                            ? new Date(sale.deliveryDate).toLocaleDateString()
+                            : '—'}
                         </td>
                         <td className="py-2 px-3 font-semibold text-emerald-600">
                           Rs.{Number(sale.total ?? 0).toFixed(2)}
@@ -333,10 +359,98 @@ export default function CustomersPage() {
                             ))}
                           </ul>
                         </td>
+                        <td className="py-2 px-3 text-right align-top">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSale(sale)}
+                            className="px-3 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold text-emerald-700"
+                          >
+                            View Delivery
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {selectedSale && (
+              <div className="mt-4 border-t border-slate-200 pt-4 space-y-2">
+                <h3 className="text-lg font-semibold text-slate-800">
+                  Delivery Details for Invoice #{selectedSale.id}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                  <div>
+                    <div className="font-semibold text-slate-600">
+                      Bill Date
+                    </div>
+                    <div className="text-slate-900">
+                      {new Date(selectedSale.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-600">
+                      Delivery Date
+                    </div>
+                    <div className="text-slate-900">
+                      {selectedSale.deliveryDate
+                        ? new Date(
+                            selectedSale.deliveryDate,
+                          ).toLocaleDateString()
+                        : '—'}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <div className="font-semibold text-slate-600">
+                      Delivery To / Notes
+                    </div>
+                    <div className="text-slate-900 min-h-[1.5rem]">
+                      {selectedSale.deliveryNote || '—'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-800 mb-1">
+                      Products on this Delivery
+                    </h4>
+                    <ul className="space-y-1 text-xs sm:text-sm">
+                      {selectedSale.items.map((it) => (
+                        <li key={it.id}>
+                          <div className="font-semibold text-slate-900">
+                            {it.product?.name || `Product #${it.productId}`}
+                          </div>
+                          <div className="text-slate-600">
+                            ID #{it.productId}
+                            {it.product?.sku ? ` · SKU ${it.product.sku}` : ''}
+                            {it.product?.barcode
+                              ? ` · Barcode ${it.product.barcode}`
+                              : ''}
+                          </div>
+                          <div>
+                            Qty {Math.abs(it.quantity)} @ Rs.
+                            {Number(it.price).toFixed(2)} = Rs.
+                            {Number(it.subtotal).toFixed(2)}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-800 mb-1">
+                      Payments for this Bill
+                    </h4>
+                    <ul className="space-y-1 text-xs sm:text-sm">
+                      {selectedSale.payments.map((p) => (
+                        <li key={p.id}>
+                          {p.method}: Rs.{Number(p.amount).toFixed(2)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
             )}
           </div>

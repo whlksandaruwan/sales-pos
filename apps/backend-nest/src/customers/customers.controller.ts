@@ -36,6 +36,12 @@ export class CustomersController {
     return this.customersService.findAll();
   }
 
+  @Get('product-refs')
+  @Roles(RoleEnum.Admin, RoleEnum.Manager)
+  productRefs() {
+    return this.customersService.productRefs();
+  }
+
   @Get(':id')
   @Roles(RoleEnum.Admin, RoleEnum.Manager)
   findOne(@Param('id') id: string) {

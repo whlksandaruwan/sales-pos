@@ -43,6 +43,8 @@ var PaymentMethod;
     PaymentMethod["Cash"] = "Cash";
     PaymentMethod["Card"] = "Card";
     PaymentMethod["QR"] = "QR";
+    PaymentMethod["DigitalWallet"] = "DigitalWallet";
+    PaymentMethod["Credit"] = "Credit";
 })(PaymentMethod || (exports.PaymentMethod = PaymentMethod = {}));
 class PaymentDto {
 }

@@ -10,6 +10,8 @@ import AdminUsersPage from './AdminUsersPage';
 import CustomersPage from './CustomersPage';
 import RefundsPage from './RefundsPage';
 import CompanyPage from './CompanyPage';
+import CategoriesPage from './CategoriesPage';
+import RefsPage from './RefsPage';
 import { useAuthStore } from '../store/authStore';
 
 // Protected Route wrapper
@@ -80,10 +82,22 @@ export default function App() {
                       📦 Products
                     </Link>
                     <Link
+                      to="/admin/categories"
+                      className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                    >
+                      🏷️ Categories
+                    </Link>
+                    <Link
                       to="/customers"
                       className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
                     >
                       👥 Customers
+                    </Link>
+                    <Link
+                      to="/refs"
+                      className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                    >
+                      🚚 Refs
                     </Link>
                     <Link
                       to="/admin/reports"
@@ -186,6 +200,15 @@ export default function App() {
           />
 
           <Route
+            path="/admin/categories"
+            element={
+              <ProtectedRoute>
+                <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/admin/reports"
             element={
               <ProtectedRoute>
@@ -217,6 +240,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <CustomersPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/refs"
+            element={
+              <ProtectedRoute>
+                <RefsPage />
               </ProtectedRoute>
             }
           />

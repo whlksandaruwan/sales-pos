@@ -72,6 +72,19 @@ export class CreateSaleDto {
   @IsInt()
   customerId?: number;
 
+  @ApiProperty({ required: false, description: 'Delivery date for this sale' })
+  @IsOptional()
+  @IsString()
+  deliveryDate?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Delivery details (address / contact person / notes)',
+  })
+  @IsOptional()
+  @IsString()
+  deliveryNote?: string;
+
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()

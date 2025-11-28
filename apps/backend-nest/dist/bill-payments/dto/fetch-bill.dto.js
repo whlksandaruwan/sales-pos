@@ -16,7 +16,6 @@ var BillProvider;
 (function (BillProvider) {
     BillProvider["Electricity"] = "electricity";
     BillProvider["Water"] = "water";
-    BillProvider["Mobile"] = "mobile";
 })(BillProvider || (exports.BillProvider = BillProvider = {}));
 class FetchBillDto {
 }

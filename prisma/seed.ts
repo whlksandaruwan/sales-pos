@@ -77,6 +77,15 @@ async function main() {
     },
   });
 
+  const supplier = await prisma.supplier.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      name: 'Book Distributors Ltd',
+      contact: 'contact@bookdist.com / +94112345678 / 123 Main St, Colombo',
+    },
+  });
+
   const product = await prisma.product.upsert({
     where: { sku: 'BOOK-001' },
     update: {},
@@ -86,6 +95,7 @@ async function main() {
       isbn: '9780000000001',
       barcode: '100000000001',
       categoryId: category.id,
+      supplierId: supplier.id,
       price: 19.99,
       cost: 10.0,
       unit: 'pcs',
