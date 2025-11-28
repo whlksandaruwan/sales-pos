@@ -2,8 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body, #root {
+  @apply h-full w-full overflow-hidden;
+}
+
 body {
   @apply bg-slate-100 text-slate-900;
 }
 
+/* Custom scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184) rgb(241 245 249);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgb(241 245 249);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgb(148 163 184);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139);
+}
 

@@ -150,9 +150,9 @@ export default function BillingPage() {
   const change = Math.max(0, totalPaid - total);
 
   return (
-    <div className="grid grid-cols-3 gap-6 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full max-h-[calc(100vh-8rem)]">
       {/* Left: Cart Items */}
-      <div className="col-span-2 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
+      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col min-h-[400px] lg:min-h-0">
         <form onSubmit={handleScanSubmit} className="mb-6">
           <label className="block text-lg font-bold mb-3 text-slate-700">
             🔍 Scan Barcode
@@ -175,20 +175,21 @@ export default function BillingPage() {
               <p className="text-sm">Scan a product to get started</p>
             </div>
           ) : (
-            <table className="w-full">
-              <thead className="border-b-2 border-slate-200">
-                <tr className="text-left">
-                  <th className="py-3 text-base font-bold text-slate-700">Item</th>
-                  <th className="py-3 text-base font-bold text-slate-700">Quantity</th>
-                  <th className="py-3 text-base font-bold text-slate-700">Price</th>
-                  <th className="py-3 text-base font-bold text-slate-700">Subtotal</th>
-                  <th className="py-3"></th>
-                </tr>
-              </thead>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead className="border-b-2 border-slate-200">
+                  <tr className="text-left">
+                    <th className="py-3 text-sm sm:text-base font-bold text-slate-700">Item</th>
+                    <th className="py-3 text-sm sm:text-base font-bold text-slate-700">Quantity</th>
+                    <th className="py-3 text-sm sm:text-base font-bold text-slate-700">Price</th>
+                    <th className="py-3 text-sm sm:text-base font-bold text-slate-700">Subtotal</th>
+                    <th className="py-3"></th>
+                  </tr>
+                </thead>
               <tbody>
                 {items.map((item) => (
                   <tr key={item.productId} className="border-b border-slate-100">
-                    <td className="py-4 text-base font-medium">{item.name}</td>
+                    <td className="py-4 text-sm sm:text-base font-medium">{item.name}</td>
                     <td className="py-4">
                       <div className="inline-flex items-center gap-2 bg-slate-100 rounded-lg p-1">
                         <button
@@ -210,10 +211,10 @@ export default function BillingPage() {
                         </button>
                       </div>
                     </td>
-                    <td className="py-4 text-base font-semibold">
+                    <td className="py-4 text-sm sm:text-base font-semibold">
                       Rs.{item.price.toFixed(2)}
                     </td>
-                    <td className="py-4 text-base font-bold text-emerald-600">
+                    <td className="py-4 text-sm sm:text-base font-bold text-emerald-600">
                       Rs.{(item.price * item.quantity).toFixed(2)}
                     </td>
                     <td className="py-4">
@@ -229,12 +230,13 @@ export default function BillingPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>
 
       {/* Right: Payment Panel */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col gap-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 min-h-[400px] lg:min-h-0">
         <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-6 text-white">
           <div className="text-sm font-medium mb-1">Total Amount</div>
           <div className="text-4xl font-bold">Rs.{total.toFixed(2)}</div>

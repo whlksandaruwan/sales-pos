@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
     })) ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-h-full overflow-auto">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-2xl">
           📊
@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-medium opacity-90">Today Revenue</div>
@@ -100,14 +100,14 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 bg-white rounded-2xl shadow-lg p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-slate-800">
               📊 Today's Sales Trend
             </h2>
           </div>
-          <div className="h-80">
+          <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
           <h2 className="text-xl font-bold text-slate-800 mb-4">
             ⚠️ Low Stock Alert
           </h2>
-          <div className="space-y-2 max-h-80 overflow-y-auto">
+          <div className="space-y-2 max-h-64 sm:max-h-80 overflow-y-auto">
             {lowStock.data && lowStock.data.length > 0 ? (
               lowStock.data.slice(0, 10).map((p) => (
                 <div

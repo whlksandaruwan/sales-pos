@@ -4,7 +4,6 @@ import { IsEnum, IsString } from 'class-validator';
 export enum BillProvider {
   Electricity = 'electricity',
   Water = 'water',
-  Mobile = 'mobile',
 }
 
 export class FetchBillDto {

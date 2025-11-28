@@ -47,7 +47,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 h-full overflow-auto">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 bg-sky-500 rounded-xl flex items-center justify-center text-2xl">
           👤
@@ -60,12 +60,12 @@ export default function AdminUsersPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-2xl shadow-lg p-6 space-y-4"
+        className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-4"
       >
         <h2 className="text-xl font-semibold text-slate-800 mb-2">
           Create New User
         </h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold mb-1">Full Name</label>
             <input
@@ -119,9 +119,10 @@ export default function AdminUsersPage() {
         </button>
       </form>
 
-      <div className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 overflow-auto">
         <h2 className="text-xl font-semibold text-slate-800 mb-4">All Users</h2>
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
           <thead className="bg-slate-50">
             <tr className="text-left">
               <th className="py-2 px-3">Name</th>
@@ -139,6 +140,7 @@ export default function AdminUsersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

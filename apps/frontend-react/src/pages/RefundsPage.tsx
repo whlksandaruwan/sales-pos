@@ -73,7 +73,7 @@ export default function RefundsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 h-full overflow-auto">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 bg-rose-500 rounded-xl flex items-center justify-center text-2xl">
           🧾
@@ -88,12 +88,12 @@ export default function RefundsPage() {
 
       <form
         onSubmit={fetchSale}
-        className="bg-white rounded-2xl shadow-lg p-6 space-y-4"
+        className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-4"
       >
         <label className="block text-sm font-semibold mb-1">
           Invoice / Sale ID
         </label>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <input
             value={saleId}
             onChange={(e) => setSaleId(e.target.value)}
@@ -103,7 +103,7 @@ export default function RefundsPage() {
           <button
             type="submit"
             disabled={loading || !saleId}
-            className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-semibold disabled:opacity-60"
+            className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-semibold disabled:opacity-60 whitespace-nowrap"
           >
             {loading ? 'Loading…' : 'Find Sale'}
           </button>
@@ -111,11 +111,12 @@ export default function RefundsPage() {
       </form>
 
       {sale && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+        <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-4 overflow-auto">
           <h2 className="text-xl font-semibold text-slate-800 mb-2">
             Items in Sale #{sale.id}
           </h2>
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
             <thead className="bg-slate-50">
               <tr className="text-left">
                 <th className="py-2 px-3">Product ID</th>
@@ -142,6 +143,7 @@ export default function RefundsPage() {
               ))}
             </tbody>
           </table>
+          </div>
           <button
             type="button"
             onClick={submitRefund}

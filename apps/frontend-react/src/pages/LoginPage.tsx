@@ -29,10 +29,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4 overflow-auto">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md space-y-6"
+        className="bg-white rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-md space-y-4 sm:space-y-6 my-auto"
       >
         <div className="text-center space-y-2">
           <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-3xl mx-auto">

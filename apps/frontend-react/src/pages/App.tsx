@@ -43,119 +43,109 @@ export default function App() {
   const isManager = role === 'Manager';
   const isCashier = role === 'Cashier';
 
-  const isLoggedIn = !!user;
-
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {isLoggedIn && (
-        <aside className="w-64 bg-slate-900 text-white flex flex-col py-4 shadow-xl">
-          <div className="px-4 pb-6 border-b border-slate-700 flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-xl font-bold">
-              📚
-            </div>
-            <div>
-              <div className="text-lg font-bold leading-tight">Bookshop POS</div>
-              <div className="text-[11px] text-slate-300">
-                {user?.role} Panel
+    <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
+      {user && (
+        <header className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-4 py-3 shadow-lg flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-xl font-bold">
+                📚
               </div>
+              <span className="text-xl font-bold">Bookshop POS</span>
             </div>
-          </div>
+            <div className="flex items-center gap-4">
+              <nav className="flex gap-2 flex-wrap">
+                {/* POS: all roles */}
+                <Link
+                  to="/pos"
+                  className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                >
+                  🛒 POS
+                </Link>
 
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto text-sm">
-            {/* POS: all roles */}
-            <Link
-              to="/pos"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
-            >
-              <span>🛒</span> <span>POS</span>
-            </Link>
-
-            {/* Dashboard / Products / Customers / Reports / Users: Admin & Manager */}
-            {(isAdmin || isManager) && (
-              <>
-                <Link
-                  to="/admin/dashboard"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
-                >
-                  <span>📊</span> <span>Dashboard</span>
-                </Link>
-                <Link
-                  to="/admin/products"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
-                >
-                  <span>📦</span> <span>Products</span>
-                </Link>
-                <Link
-                  to="/customers"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
-                >
-                  <span>👥</span> <span>Customers</span>
-                </Link>
-                <Link
-                  to="/admin/reports"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
-                >
-                  <span>📈</span> <span>Reports</span>
-                </Link>
-                {isAdmin && (
-                  <Link
-                    to="/admin/users"
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
-                  >
-                    <span>👤</span> <span>Users</span>
-                  </Link>
+                {/* Dashboard / Products / Customers / Reports / Users: Admin & Manager */}
+                {(isAdmin || isManager) && (
+                  <>
+                    <Link
+                      to="/admin/dashboard"
+                      className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                    >
+                      📊 Dashboard
+                    </Link>
+                    <Link
+                      to="/admin/products"
+                      className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                    >
+                      📦 Products
+                    </Link>
+                    <Link
+                      to="/customers"
+                      className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                    >
+                      👥 Customers
+                    </Link>
+                    <Link
+                      to="/admin/reports"
+                      className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                    >
+                      📈 Reports
+                    </Link>
+                    {isAdmin && (
+                      <Link
+                        to="/admin/users"
+                        className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                      >
+                        👤 Users
+                      </Link>
+                    )}
+                  </>
                 )}
-              </>
-            )}
 
-            {/* Bill Payments & Refunds: Admin, Manager, Cashier */}
-            {(isAdmin || isManager || isCashier) && (
-              <>
+                {/* Bill Payments & Refunds: Admin, Manager, Cashier */}
+                {(isAdmin || isManager || isCashier) && (
+                  <>
+                    <Link
+                      to="/bill-payments"
+                      className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                    >
+                      💳 Bill Payments
+                    </Link>
+                    <Link
+                      to="/refunds"
+                      className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
+                    >
+                      🧾 Refunds
+                    </Link>
+                  </>
+                )}
+
+                {/* Company info: all roles */}
                 <Link
-                  to="/bill-payments"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
+                  to="/company"
+                  className="px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors font-medium"
                 >
-                  <span>💳</span> <span>Bill Payments</span>
+                  🏢 Company
                 </Link>
-                <Link
-                  to="/refunds"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
+              </nav>
+              <div className="flex items-center gap-3 border-l border-slate-600 pl-4">
+                <div className="text-right hidden sm:block">
+                  <div className="text-sm font-semibold">{user.fullName}</div>
+                  <div className="text-xs text-slate-300">{user.role}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={clearAuth}
+                  className="bg-red-500 hover:bg-red-600 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
                 >
-                  <span>🧾</span> <span>Refunds</span>
-                </Link>
-              </>
-            )}
-
-            {/* Company info: all roles */}
-            <Link
-              to="/company"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-800 font-medium"
-            >
-              <span>🏢</span> <span>Company</span>
-            </Link>
-          </nav>
-
-          <div className="px-4 pt-3 border-t border-slate-700 flex items-center justify-between gap-3 text-xs">
-            <div>
-              <div className="font-semibold truncate max-w-[140px]">
-                {user?.fullName}
+                  Logout
+                </button>
               </div>
-              <div className="text-slate-300">{user?.role}</div>
             </div>
-            <button
-              type="button"
-              onClick={clearAuth}
-              className="bg-red-500 hover:bg-red-600 rounded-lg px-3 py-1 text-[11px] font-semibold"
-            >
-              Logout
-            </button>
           </div>
-        </aside>
+        </header>
       )}
-
-      <main
-        className={`flex-1 p-6 ${isLoggedIn ? 'max-w-full' : 'flex items-center justify-center'}`}
-      >
+      <main className="flex-1 overflow-auto p-4 sm:p-6">
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
 

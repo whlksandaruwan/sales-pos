@@ -156,8 +156,8 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <div className="space-y-6 relative">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6 relative h-full flex flex-col overflow-hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center text-2xl">
             📦
@@ -167,10 +167,10 @@ export default function AdminProductsPage() {
             <p className="text-slate-600">Manage your inventory</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="w-72">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          <div className="w-full sm:w-72">
             <input
-              placeholder="🔍 Search by name, SKU, ISBN, or barcode..."
+              placeholder="🔍 Search..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full border-2 border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-purple-500 transition-colors"
@@ -179,21 +179,21 @@ export default function AdminProductsPage() {
           <button
             type="button"
             onClick={openNewForm}
-            className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-xl text-sm font-semibold shadow-md"
+            className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-xl text-sm font-semibold shadow-md whitespace-nowrap"
           >
             + Add Product
           </button>
           <button
             type="button"
             onClick={() => setShowBulk(true)}
-            className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-3 rounded-xl text-sm font-semibold shadow-md"
+            className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-3 rounded-xl text-sm font-semibold shadow-md whitespace-nowrap"
           >
             ⬆ Bulk Import
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden flex-1 flex flex-col min-h-0">
         {isLoading ? (
           <div className="p-12 text-center text-slate-400">
             <div className="text-4xl mb-2">⏳</div>
@@ -205,25 +205,26 @@ export default function AdminProductsPage() {
             <p className="text-lg">No products found</p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-auto flex-1">
+            <table className="w-full">
             <thead className="bg-slate-50 border-b-2 border-slate-200">
               <tr className="text-left">
-                <th className="py-4 px-6 text-base font-bold text-slate-700">
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-bold text-slate-700">
                   Product Name
                 </th>
-                <th className="py-4 px-6 text-base font-bold text-slate-700">
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-bold text-slate-700 hidden lg:table-cell">
                   SKU
                 </th>
-                <th className="py-4 px-6 text-base font-bold text-slate-700">
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-bold text-slate-700 hidden xl:table-cell">
                   ISBN
                 </th>
-                <th className="py-4 px-6 text-base font-bold text-slate-700">
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-bold text-slate-700 hidden md:table-cell">
                   Barcode
                 </th>
-                <th className="py-4 px-6 text-base font-bold text-slate-700">
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-bold text-slate-700">
                   Price
                 </th>
-                <th className="py-4 px-6 text-base font-bold text-slate-700">
+                <th className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-bold text-slate-700">
                   Stock
                 </th>
               </tr>
@@ -234,22 +235,22 @@ export default function AdminProductsPage() {
                   key={p.id}
                   className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                 >
-                  <td className="py-4 px-6 text-base font-semibold">
+                  <td className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-semibold">
                     {p.name}
                   </td>
-                  <td className="py-4 px-6 text-base text-slate-600">
+                  <td className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base text-slate-600 hidden lg:table-cell">
                     {p.sku}
                   </td>
-                  <td className="py-4 px-6 text-base text-slate-600">
+                  <td className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base text-slate-600 hidden xl:table-cell">
                     {p.isbn || '—'}
                   </td>
-                  <td className="py-4 px-6 text-base font-mono text-slate-600">
+                  <td className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-mono text-slate-600 hidden md:table-cell">
                     {p.barcode}
                   </td>
-                  <td className="py-4 px-6 text-base font-bold text-emerald-600">
+                  <td className="py-3 px-3 sm:py-4 sm:px-6 text-sm sm:text-base font-bold text-emerald-600">
                     Rs.{Number(p.price).toFixed(2)}
                   </td>
-                  <td className="py-4 px-6 flex items-center gap-3">
+                  <td className="py-3 px-3 sm:py-4 sm:px-6 flex items-center gap-2 sm:gap-3">
                     <span
                       className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
                         (p.stock?.reduce(
@@ -289,13 +290,14 @@ export default function AdminProductsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
       {/* Product Form Drawer */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-end z-20">
-          <div className="w-full max-w-lg bg-white h-full p-6 shadow-2xl overflow-y-auto">
+          <div className="w-full sm:max-w-lg bg-white h-full p-4 sm:p-6 shadow-2xl overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-slate-800">
                 {editingProduct ? 'Edit Product' : 'Add Product'}
@@ -442,8 +444,8 @@ export default function AdminProductsPage() {
 
       {/* Bulk Import Modal */}
       {showBulk && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-30">
-          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-6 space-y-4">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-30 p-4">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-800">
                 Bulk Import Products (CSV)
