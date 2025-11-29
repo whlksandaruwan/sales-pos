@@ -46,7 +46,7 @@ let ProductsController = class ProductsController {
         return this.productsService.delete(Number(id));
     }
     async printSticker(dto) {
-        return { success: true, job: { productIds: dto.productIds } };
+        return { success: true, productIds: dto.productIds };
     }
 };
 exports.ProductsController = ProductsController;

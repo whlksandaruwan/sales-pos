@@ -4,15 +4,15 @@ export declare class StockController {
     constructor(service: StockService);
     getByProduct(productId: string): Promise<({
         store: {
-            name: string;
             id: number;
+            name: string;
             code: string;
             address: string | null;
         };
     } & {
         id: number;
-        productId: number;
         storeId: number;
+        productId: number;
         quantity: number;
     })[]>;
     adjust(req: any, body: {
@@ -21,8 +21,8 @@ export declare class StockController {
         quantity: number;
     }): Promise<{
         id: number;
-        productId: number;
         storeId: number;
+        productId: number;
         quantity: number;
     }>;
     set(req: any, body: {
@@ -31,8 +31,8 @@ export declare class StockController {
         quantity: number;
     }): Promise<{
         id: number;
-        productId: number;
         storeId: number;
+        productId: number;
         quantity: number;
     }>;
 }

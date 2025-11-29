@@ -29,8 +29,7 @@ let SalesController = class SalesController {
     async create(req, dto) {
         const user = req.user;
         const storeId = 1;
-        const sale = await this.salesService.create(user.id, storeId, dto);
-        return sale;
+        return this.salesService.create(user.id, storeId, dto);
     }
     async getById(id) {
         return this.salesService.findOne(Number(id));

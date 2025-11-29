@@ -9,46 +9,48 @@ export declare class ReportsController {
         to?: string;
     }): Promise<({
         user: {
-            id: number;
             createdAt: Date;
+            id: number;
             email: string;
             passwordHash: string;
             fullName: string;
             roleId: number;
             updatedAt: Date;
         };
-        items: {
-            price: import("@prisma/client/runtime/library").Decimal;
-            id: number;
-            productId: number;
-            quantity: number;
-            discount: import("@prisma/client/runtime/library").Decimal;
-            saleId: number;
-            subtotal: import("@prisma/client/runtime/library").Decimal;
-        }[];
         customer: {
-            name: string;
             id: number;
+            name: string;
             email: string | null;
             phone: string | null;
             credit: import("@prisma/client/runtime/library").Decimal;
         } | null;
+        items: {
+            discount: import("@prisma/client/runtime/library").Decimal;
+            id: number;
+            saleId: number;
+            productId: number;
+            quantity: number;
+            price: import("@prisma/client/runtime/library").Decimal;
+            subtotal: import("@prisma/client/runtime/library").Decimal;
+        }[];
         payments: {
             id: number;
-            amount: import("@prisma/client/runtime/library").Decimal;
             saleId: number;
             method: string;
+            amount: import("@prisma/client/runtime/library").Decimal;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
         }[];
     } & {
-        id: number;
-        storeId: number;
-        userId: number;
-        createdAt: Date;
-        terminalId: number | null;
-        customerId: number | null;
         total: import("@prisma/client/runtime/library").Decimal;
         discount: import("@prisma/client/runtime/library").Decimal;
+        createdAt: Date;
+        deliveryDate: Date | null;
+        deliveryNote: string | null;
+        id: number;
+        storeId: number;
+        terminalId: number | null;
+        userId: number;
+        customerId: number | null;
     })[]>;
     pnl(query: {
         period?: 'daily' | 'weekly' | 'monthly';
@@ -84,14 +86,14 @@ export declare class ReportsController {
         from?: string;
         to?: string;
     }): Promise<{
+        createdAt: Date;
         id: number;
         storeId: number;
+        userId: number;
+        amount: import("@prisma/client/runtime/library").Decimal;
         provider: string;
         reference: string;
-        amount: import("@prisma/client/runtime/library").Decimal;
         status: string;
-        userId: number;
-        createdAt: Date;
     }[]>;
     supplierSales(query: {
         from?: string;
@@ -104,20 +106,20 @@ export declare class ReportsController {
         from?: string;
         to?: string;
     }): Promise<({
-        store: {
-            name: string;
-            id: number;
-            code: string;
-            address: string | null;
-        };
         user: {
-            id: number;
             createdAt: Date;
+            id: number;
             email: string;
             passwordHash: string;
             fullName: string;
             roleId: number;
             updatedAt: Date;
+        };
+        store: {
+            id: number;
+            name: string;
+            code: string;
+            address: string | null;
         };
     } & {
         id: number;

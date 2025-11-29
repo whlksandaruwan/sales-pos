@@ -89,8 +89,17 @@ export class ProductsService {
   }
 
   async findByBarcode(code: string) {
+    const trimmed = code.trim();
+    const orConditions: Prisma.ProductWhereInput[] = [{ barcode: trimmed }];
+
+    // Some EAN-13 scanners return the full 13 digits including checksum,
+    // while product barcodes might be stored without the last checksum digit.
+    if (trimmed.length > 1) {
+      orConditions.push({ barcode: trimmed.slice(0, -1) });
+    }
+
     const product = await this.prisma.product.findFirst({
-      where: { barcode: code },
+      where: { OR: orConditions },
     });
     if (!product) throw new NotFoundException('Product not found');
     return product;

@@ -83,8 +83,13 @@ let ProductsService = class ProductsService {
         }
     }
     async findByBarcode(code) {
+        const trimmed = code.trim();
+        const orConditions = [{ barcode: trimmed }];
+        if (trimmed.length > 1) {
+            orConditions.push({ barcode: trimmed.slice(0, -1) });
+        }
         const product = await this.prisma.product.findFirst({
-            where: { barcode: code },
+            where: { OR: orConditions },
         });
         if (!product)
             throw new common_1.NotFoundException('Product not found');

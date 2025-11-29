@@ -22,7 +22,10 @@ let CustomersService = class CustomersService {
     findAll() {
         return this.prisma.customer.findMany();
     }
-    findOne(id) {
+    async findOne(id) {
+        if (!id || Number.isNaN(id)) {
+            throw new common_1.BadRequestException('Customer id is required');
+        }
         return this.prisma.customer.findUnique({ where: { id } });
     }
     update(id, dto) {
@@ -37,8 +40,25 @@ let CustomersService = class CustomersService {
     salesHistory(id) {
         return this.prisma.sale.findMany({
             where: { customerId: id },
-            include: { items: true, payments: true },
+            include: {
+                items: { include: { product: true } },
+                payments: true,
+            },
             orderBy: { createdAt: 'desc' },
+        });
+    }
+    async productRefs() {
+        return this.prisma.saleItem.findMany({
+            include: {
+                product: true,
+                sale: {
+                    include: {
+                        customer: true,
+                        user: true,
+                    },
+                },
+            },
+            orderBy: { id: 'desc' },
         });
     }
 };

@@ -12,10 +12,10 @@ export declare class DashboardController {
     } & {
         id: number;
         name: string;
+        price: import("@prisma/client/runtime/library").Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;

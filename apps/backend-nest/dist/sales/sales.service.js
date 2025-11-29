@@ -11,11 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SalesService = void 0;
 const common_1 = require("@nestjs/common");
+const axios_1 = require("@nestjs/axios");
+const rxjs_1 = require("rxjs");
 const prisma_service_1 = require("../prisma/prisma.service");
 const create_sale_dto_1 = require("./dto/create-sale.dto");
 let SalesService = class SalesService {
-    constructor(prisma) {
+    constructor(prisma, http) {
         this.prisma = prisma;
+        this.http = http;
     }
     async create(userId, storeId, dto) {
         return this.prisma.$transaction(async (tx) => {
@@ -81,6 +84,27 @@ let SalesService = class SalesService {
                     data: dto,
                 },
             });
+            const hasCash = dto.payments.some((p) => p.method === create_sale_dto_1.PaymentMethod.Cash && p.amount > 0);
+            const agentUrl = process.env.PRINT_AGENT_URL || 'http://localhost:4100';
+            const receiptLines = [];
+            dto.items.forEach((item) => {
+                const lineTotal = (item.price - (item.discount || 0)) * item.quantity;
+                receiptLines.push(`${item.quantity} x Rs.${item.price.toFixed(2)}  = Rs.${lineTotal.toFixed(2)}`);
+            });
+            receiptLines.push(`TOTAL: Rs.${total.toFixed(2)}`);
+            (0, rxjs_1.lastValueFrom)(this.http.post(`${agentUrl}/print/receipt`, {
+                title: 'Ahasna Sale Center',
+                lines: receiptLines,
+                footer: 'Software By INNOVATECH  0742256408',
+            })).catch(() => undefined);
+            if (hasCash) {
+                (0, rxjs_1.lastValueFrom)(this.http.post(`${agentUrl}/cash-drawer/open`, {
+                    saleId: sale.id,
+                    storeId,
+                    userId,
+                    total,
+                })).catch(() => undefined);
+            }
             return sale;
         });
     }
@@ -154,6 +178,7 @@ let SalesService = class SalesService {
 exports.SalesService = SalesService;
 exports.SalesService = SalesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        axios_1.HttpService])
 ], SalesService);
 //# sourceMappingURL=sales.service.js.map

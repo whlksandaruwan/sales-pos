@@ -89,6 +89,21 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateSaleDto.prototype, "customerId", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ required: false, description: 'Delivery date for this sale' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateSaleDto.prototype, "deliveryDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        required: false,
+        description: 'Delivery details (address / contact person / notes)',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateSaleDto.prototype, "deliveryNote", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

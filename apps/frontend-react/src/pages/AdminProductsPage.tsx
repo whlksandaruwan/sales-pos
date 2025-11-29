@@ -29,20 +29,42 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     if (!barcodeProduct) return;
-    const canvas = document.getElementById(
-      'barcode-canvas',
-    ) as HTMLCanvasElement | null;
+    const canvas = document.getElementById('barcode-canvas') as
+      | HTMLCanvasElement
+      | null;
     if (!canvas) return;
     try {
-      // @ts-ignore
-      bwipjs.toCanvas(canvas, {
-        bcid: 'code128',
-        text: String(barcodeProduct.barcode || barcodeProduct.sku),
-        scale: 3,
-        height: 10,
-        includetext: true,
-        textxalign: 'center',
-      });
+      // Many low-cost scanners are optimized for EAN/UPC. Render as EAN-13.
+      const raw = String(barcodeProduct.barcode || barcodeProduct.sku || '');
+      const digitsOnly = raw.replace(/\D/g, '');
+
+      // EAN-13 expects 12 or 13 digits. If invalid, just show a warning text.
+      if (digitsOnly.length < 12) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.font = '14px sans-serif';
+          ctx.fillText('Barcode must be at least 12 digits', 10, 30);
+        }
+        return;
+      }
+
+      // Use first 13 digits max; bwip-js will compute/validate checksum.
+      const eanText = digitsOnly.slice(0, 13);
+
+      // @ts-ignore - bwip-js has no TS types by default
+      bwipjs.toCanvas(
+        canvas,
+        {
+          bcid: 'ean13',
+          text: eanText,
+          scale: 3,
+          height: 10,
+          includetext: true,
+          textxalign: 'center',
+        },
+        () => {},
+      );
     } catch (e) {
       console.error('Failed to render barcode', e);
     }
@@ -286,23 +308,30 @@ export default function AdminProductsPage() {
                         body {
                           margin: 0;
                           display: flex;
+                          flex-direction: column;
                           justify-content: center;
                           align-items: center;
                           height: 100vh;
+                          font-family: 'Courier New', monospace;
                         }
-                        img { width: 90%; }
+                        img { width: 90%; margin-bottom: 1mm; }
+                        .price {
+                          font-size: 12pt;
+                          font-weight: bold;
+                          text-align: center;
+                        }
                       </style>
                     </head>
                     <body>
                       <img src="${dataUrl}" />
+                      <div class="price">Rs. ${Number(barcodeProduct.price).toFixed(2)}</div>
                     </body>
                     </html>`);
                   w.document.close();
                   w.focus();
                   setTimeout(() => {
                     w.print();
-                    w.close();
-                  }, 300);
+                  }, 500);
                 }}
                 className="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-2.5 rounded-lg text-sm font-semibold"
               >

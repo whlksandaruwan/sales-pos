@@ -32,6 +32,9 @@ let CustomersController = class CustomersController {
     findAll() {
         return this.customersService.findAll();
     }
+    productRefs() {
+        return this.customersService.productRefs();
+    }
     findOne(id) {
         return this.customersService.findOne(Number(id));
     }
@@ -61,6 +64,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], CustomersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('product-refs'),
+    (0, roles_decorator_1.Roles)(roles_enum_1.RoleEnum.Admin, roles_enum_1.RoleEnum.Manager),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], CustomersController.prototype, "productRefs", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, roles_decorator_1.Roles)(roles_enum_1.RoleEnum.Admin, roles_enum_1.RoleEnum.Manager),

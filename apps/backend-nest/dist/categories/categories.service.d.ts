@@ -7,34 +7,34 @@ export declare class CategoriesService {
             products: number;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
     })[]>;
     findOne(id: number): import(".prisma/client").Prisma.Prisma__CategoryClient<({
         products: {
+            id: number;
             name: string;
+            price: import("@prisma/client/runtime/library").Decimal;
             sku: string;
             isbn: string | null;
             barcode: string;
-            price: import("@prisma/client/runtime/library").Decimal;
             cost: import("@prisma/client/runtime/library").Decimal;
             unit: string;
             reorderThreshold: number;
-            id: number;
             categoryId: number | null;
             supplierId: number | null;
         }[];
     } & {
-        name: string;
         id: number;
+        name: string;
     }) | null, null, import("@prisma/client/runtime/library").DefaultArgs>;
     create(name: string): import(".prisma/client").Prisma.Prisma__CategoryClient<{
-        name: string;
         id: number;
+        name: string;
     }, never, import("@prisma/client/runtime/library").DefaultArgs>;
     update(id: number, name: string): import(".prisma/client").Prisma.Prisma__CategoryClient<{
-        name: string;
         id: number;
+        name: string;
     }, never, import("@prisma/client/runtime/library").DefaultArgs>;
     delete(id: number): Promise<{
         success: boolean;

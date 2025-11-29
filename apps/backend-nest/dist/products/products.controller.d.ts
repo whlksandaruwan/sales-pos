@@ -7,77 +7,77 @@ export declare class ProductsController {
     constructor(productsService: ProductsService);
     getAll(q?: string): Promise<({
         category: {
-            name: string;
             id: number;
+            name: string;
         } | null;
         stock: {
             id: number;
-            productId: number;
             storeId: number;
+            productId: number;
             quantity: number;
         }[];
     } & {
+        id: number;
         name: string;
+        price: import("@prisma/client/runtime/library").Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     })[]>;
     getByBarcode(code: string): Promise<{
+        id: number;
         name: string;
+        price: import("@prisma/client/runtime/library").Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     }>;
     create(dto: CreateProductDto): Promise<{
+        id: number;
         name: string;
+        price: import("@prisma/client/runtime/library").Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     }>;
     bulkCreate(dtos: CreateProductDto[]): Promise<{
+        id: number;
         name: string;
+        price: import("@prisma/client/runtime/library").Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     }[]>;
     update(id: string, dto: UpdateProductDto): Promise<{
+        id: number;
         name: string;
+        price: import("@prisma/client/runtime/library").Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: import("@prisma/client/runtime/library").Decimal;
         cost: import("@prisma/client/runtime/library").Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     }>;
@@ -86,8 +86,6 @@ export declare class ProductsController {
     }>;
     printSticker(dto: PrintStickerDto): Promise<{
         success: boolean;
-        job: {
-            productIds: number[];
-        };
+        productIds: number[];
     }>;
 }

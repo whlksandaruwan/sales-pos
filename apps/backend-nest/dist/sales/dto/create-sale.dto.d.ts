@@ -20,5 +20,7 @@ export declare class CreateSaleDto {
     discount?: number;
     payments: PaymentDto[];
     customerId?: number;
+    deliveryDate?: string;
+    deliveryNote?: string;
     terminalIdentifier?: string;
 }

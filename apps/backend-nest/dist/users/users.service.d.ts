@@ -4,8 +4,8 @@ export declare class UsersService {
     private prisma;
     constructor(prisma: PrismaService);
     create(dto: CreateUserDto): Promise<{
-        id: number;
         createdAt: Date;
+        id: number;
         email: string;
         passwordHash: string;
         fullName: string;

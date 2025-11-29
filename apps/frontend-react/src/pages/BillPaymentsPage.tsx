@@ -11,9 +11,9 @@ function getProviderDisplay(provider: Provider) {
 }
 
 export default function BillPaymentsPage() {
-  const receiptRef = useRef<HTMLDivElement>(null);
   const [provider, setProvider] = useState<Provider>('electricity');
   const [reference, setReference] = useState('');
+  const [amount, setAmount] = useState('');
   const [fetched, setFetched] = useState<{
     amount: number;
     status: string;
@@ -21,33 +21,16 @@ export default function BillPaymentsPage() {
   const [loading, setLoading] = useState(false);
   const [paid, setPaid] = useState<any | null>(null);
 
-  async function handleFetch() {
+  async function handlePay() {
     if (!reference) {
       alert('Please enter bill reference');
       return;
     }
-    setLoading(true);
-    setPaid(null);
-    try {
-      const res = await api.post('/bill-payments/fetch', {
-        provider,
-        reference,
-      });
-      setFetched({
-        amount: Number(res.data.amount),
-        status: res.data.status,
-      });
-    } catch (err: any) {
-      console.error('Fetch bill error:', err);
-      const errorMsg = err?.response?.data?.message || err?.message || 'Failed to fetch bill. Please check if backend is running.';
-      alert(errorMsg);
-    } finally {
-      setLoading(false);
+    if (!amount || Number(amount) <= 0) {
+      alert('Please enter a valid payment amount');
+      return;
     }
-  }
-
-  async function handlePay() {
-    if (!fetched) return;
+    
     setLoading(true);
     try {
       const res = await api.post(
@@ -55,7 +38,7 @@ export default function BillPaymentsPage() {
         {
           provider,
           reference,
-          amount: fetched.amount,
+          amount: Number(amount),
         },
         {
           headers: {
@@ -64,8 +47,8 @@ export default function BillPaymentsPage() {
         },
       );
       setPaid(res.data);
-      setFetched(null);
       setReference('');
+      setAmount('');
     } catch (err: any) {
       alert(err?.response?.data?.message || 'Payment failed');
     } finally {
@@ -74,101 +57,71 @@ export default function BillPaymentsPage() {
   }
 
   function handlePrintReceipt() {
-    if (!receiptRef.current) return;
+    if (!paid) return;
     
+    // Build plain text receipt for 79mm thermal printer (32 chars per line)
+    let receipt = '';
+    receipt += '\n';
+    receipt += '================================\n';
+    receipt += '     AHASNA SALE CENTER\n';
+    receipt += '================================\n';
+    receipt += '    Bill Payment Receipt\n';
+    receipt += '================================\n\n';
+    receipt += `Transaction ID: #${paid.id ?? '-'}\n`;
+    receipt += `Date: ${new Date(paid.createdAt).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })}\n\n`;
+    receipt += '--------------------------------\n';
+    receipt += `Provider: ${getProviderDisplay(paid.provider as Provider).label}\n`;
+    receipt += `Account: ${paid.reference}\n`;
+    receipt += '--------------------------------\n\n';
+    receipt += `AMOUNT PAID:`;
+    const amtSpaces = 32 - ('AMOUNT PAID:'.length + `Rs.${Number(paid.amount).toFixed(2)}`.length);
+    receipt += ' '.repeat(Math.max(1, amtSpaces));
+    receipt += `Rs.${Number(paid.amount).toFixed(2)}\n\n`;
+    receipt += `Status: ${paid.status}\n`;
+    receipt += '\n================================\n';
+    receipt += '       Thank you!\n';
+    receipt += '   Computer-generated receipt\n';
+    receipt += '================================\n';
+    
+    // Open print window with plain text
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const receiptContent = receiptRef.current.innerHTML;
-    
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
           <title>Bill Payment Receipt</title>
           <style>
-            * {
+            @page { 
               margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            @page {
-              size: 79mm 76mm;
-              margin: 0;
+              size: 79mm auto;
             }
             body {
               font-family: 'Courier New', monospace;
-              width: 79mm;
-              height: 76mm;
-              padding: 2mm;
-              font-size: 9pt;
-              line-height: 1.2;
-              overflow: hidden;
-            }
-            .receipt-container {
-              width: 100%;
-              height: 100%;
-              display: flex;
-              flex-direction: column;
-            }
-            .header {
-              text-align: center;
-              border-bottom: 1px dashed #000;
-              padding-bottom: 1.5mm;
-              margin-bottom: 1.5mm;
-            }
-            .header h1 {
-              font-size: 12pt;
-              margin-bottom: 0.5mm;
+              font-size: 14px;
+              line-height: 1.3;
+              margin: 0;
+              padding: 3mm 3mm 0 3mm;
+              white-space: pre;
               font-weight: bold;
-            }
-            .header p {
-              font-size: 8pt;
-            }
-            .section {
-              margin-bottom: 1.5mm;
-            }
-            .section-title {
-              font-size: 7pt;
-              text-transform: uppercase;
-              margin-bottom: 0.3mm;
-              font-weight: bold;
-            }
-            .section-value {
-              font-size: 9pt;
-              font-weight: bold;
-              word-wrap: break-word;
-            }
-            .amount {
-              font-size: 12pt;
-              font-weight: bold;
-              text-align: center;
-            }
-            .divider {
-              border-top: 1px dashed #000;
-              margin: 1.5mm 0;
             }
             .footer {
+              font-size: 11px;
               text-align: center;
-              font-size: 6pt;
-              margin-top: auto;
-              padding-top: 1.5mm;
-              border-top: 1px dashed #000;
-              line-height: 1.3;
-            }
-            .footer p {
-              margin-bottom: 0.5mm;
-            }
-            @media print {
-              body {
-                padding: 1.5mm;
-              }
+              margin-top: 2mm;
+              font-weight: 600;
+              line-height: 1.4;
             }
           </style>
         </head>
-        <body>
-          ${receiptContent}
-        </body>
+        <body><pre>${receipt}</pre><div class="footer">Software By INNOVATECH Solutions<br>0742256408</div></body>
       </html>
     `);
     
@@ -254,43 +207,28 @@ export default function BillPaymentsPage() {
           </div>
         </div>
 
+        <div>
+          <label className="block text-base font-bold mb-3 text-slate-700">
+            💰 Payment Amount (Rs.)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full border-2 border-slate-300 rounded-xl px-4 py-4 text-xl font-semibold text-center focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="0.00"
+          />
+        </div>
+
         <button
           type="button"
-          onClick={handleFetch}
-          disabled={loading || !reference}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-xl text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
+          onClick={handlePay}
+          disabled={loading || !reference || !amount}
+          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
         >
-          {loading ? '⏳ Fetching...' : '🔍 Fetch Bill Details'}
+          {loading ? '⏳ Processing...' : '✓ Pay Bill Now'}
         </button>
-
-        {fetched && (
-          <div className="border-2 border-blue-200 bg-blue-50 rounded-xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-base font-semibold text-slate-700">
-                Bill Amount:
-              </span>
-              <span className="text-3xl font-bold text-blue-600">
-                Rs.{fetched.amount.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-base font-semibold text-slate-700">
-                Status:
-              </span>
-              <span className="text-lg font-bold text-orange-600">
-                {fetched.status}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={handlePay}
-              disabled={loading}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
-            >
-              {loading ? '⏳ Processing...' : '✓ Pay Bill Now'}
-            </button>
-          </div>
-        )}
 
         {paid && (
           <>
@@ -377,68 +315,6 @@ export default function BillPaymentsPage() {
               </div>
             </div>
 
-            {/* Hidden print-optimized receipt */}
-            <div ref={receiptRef} style={{ display: 'none' }}>
-              <div className="receipt-container">
-                <div className="header">
-                  <h1>AHASNA SALE CENTER</h1>
-                  <p>Bill Payment Receipt</p>
-                </div>
-
-                <div className="section">
-                  <div className="section-title">Txn ID</div>
-                  <div className="section-value">#{paid.id ?? '-'}</div>
-                </div>
-
-                <div className="divider"></div>
-
-                <div className="section">
-                  <div className="section-title">Provider</div>
-                  <div className="section-value">
-                    {getProviderDisplay(paid.provider as Provider).label}
-                  </div>
-                </div>
-
-                <div className="section">
-                  <div className="section-title">Account</div>
-                  <div className="section-value">{paid.reference}</div>
-                </div>
-
-                <div className="divider"></div>
-
-                <div className="section">
-                  <div className="section-title">Amount</div>
-                  <div className="amount">Rs. {Number(paid.amount).toFixed(2)}</div>
-                </div>
-
-                <div className="section">
-                  <div className="section-title">Status</div>
-                  <div className="section-value">{paid.status}</div>
-                </div>
-
-                <div className="divider"></div>
-
-                <div className="section">
-                  <div className="section-title">Date</div>
-                  <div className="section-value">
-                    {new Date(paid.createdAt).toLocaleString('en-GB', { 
-                      day: '2-digit', 
-                      month: '2-digit', 
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-                </div>
-
-                <div className="footer">
-                  <p>Thank you!</p>
-                  <p>Computer-generated receipt</p>
-                  <p>Software By INNOVATECH</p>
-                  <p>0742256408</p>
-                </div>
-              </div>
-            </div>
           </>
         )}
       </div>

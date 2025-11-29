@@ -32,8 +32,6 @@ export class SalesService {
           customerId: dto.customerId,
           total,
           discount,
-          deliveryDate: dto.deliveryDate ? new Date(dto.deliveryDate) : undefined,
-          deliveryNote: dto.deliveryNote,
         },
       });
 

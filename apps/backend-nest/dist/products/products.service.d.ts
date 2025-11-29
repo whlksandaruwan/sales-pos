@@ -7,41 +7,41 @@ export declare class ProductsService {
     constructor(prisma: PrismaService);
     private generateBarcode;
     create(dto: CreateProductDto): Promise<{
+        id: number;
         name: string;
+        price: Prisma.Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: Prisma.Decimal;
         cost: Prisma.Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     }>;
     bulkCreate(dtos: CreateProductDto[]): Promise<{
+        id: number;
         name: string;
+        price: Prisma.Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: Prisma.Decimal;
         cost: Prisma.Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     }[]>;
     update(id: number, dto: UpdateProductDto): Promise<{
+        id: number;
         name: string;
+        price: Prisma.Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: Prisma.Decimal;
         cost: Prisma.Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     }>;
@@ -49,39 +49,39 @@ export declare class ProductsService {
         success: boolean;
     }>;
     findByBarcode(code: string): Promise<{
+        id: number;
         name: string;
+        price: Prisma.Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: Prisma.Decimal;
         cost: Prisma.Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     }>;
     findAll(query?: string): Promise<({
         category: {
-            name: string;
             id: number;
+            name: string;
         } | null;
         stock: {
             id: number;
-            productId: number;
             storeId: number;
+            productId: number;
             quantity: number;
         }[];
     } & {
+        id: number;
         name: string;
+        price: Prisma.Decimal;
         sku: string;
         isbn: string | null;
         barcode: string;
-        price: Prisma.Decimal;
         cost: Prisma.Decimal;
         unit: string;
         reorderThreshold: number;
-        id: number;
         categoryId: number | null;
         supplierId: number | null;
     })[]>;

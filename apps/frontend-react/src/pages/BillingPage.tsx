@@ -23,6 +23,15 @@ export default function BillingPage() {
     scanInputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.activeElement !== scanInputRef.current) {
+        scanInputRef.current?.focus();
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
   const subtotal = items.reduce(
     (sum, i) => sum + i.price * i.quantity,
     0,
@@ -159,112 +168,117 @@ export default function BillingPage() {
   }
   
   function handlePrintReceipt() {
-    if (!receiptRef.current) return;
+    if (!lastSale) return;
     
+    // Calculate totals
+    const totalPaid = lastSale.payments?.reduce((sum: number, p: any) => sum + p.amount, 0) || 0;
+    const change = totalPaid - (lastSale.total || 0);
+    
+    // Build plain text receipt for 79mm thermal printer (32 chars per line)
+    let receipt = '';
+    receipt += '\n';
+    receipt += '================================\n';
+    receipt += '     AHASNA SALE CENTER\n';
+    receipt += '================================\n';
+    receipt += '        Sales Receipt\n';
+    receipt += '================================\n\n';
+    receipt += `Invoice No: #${lastSale.id}\n`;
+    receipt += `Date: ${new Date(lastSale.createdAt).toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })}\n\n`;
+    receipt += '--------------------------------\n';
+    receipt += 'ITEMS:\n';
+    receipt += '--------------------------------\n';
+    
+    lastSale.items?.forEach((item: any) => {
+      const name = item.name.substring(0, 28);
+      const qty = item.quantity;
+      const price = item.price.toFixed(2);
+      const total = (item.price * item.quantity).toFixed(2);
+      receipt += `${name}\n`;
+      receipt += `  ${qty} x Rs.${price}`;
+      const spaces = 32 - (`  ${qty} x Rs.${price}`.length + `Rs.${total}`.length);
+      receipt += ' '.repeat(Math.max(1, spaces));
+      receipt += `Rs.${total}\n`;
+    });
+    
+    receipt += '--------------------------------\n';
+    receipt += `Subtotal:`;
+    const subSpaces = 32 - ('Subtotal:'.length + `Rs.${lastSale.subtotal?.toFixed(2)}`.length);
+    receipt += ' '.repeat(Math.max(1, subSpaces));
+    receipt += `Rs.${lastSale.subtotal?.toFixed(2)}\n`;
+    
+    if (lastSale.discount > 0) {
+      receipt += `Discount:`;
+      const discSpaces = 32 - ('Discount:'.length + `-Rs.${lastSale.discount.toFixed(2)}`.length);
+      receipt += ' '.repeat(Math.max(1, discSpaces));
+      receipt += `-Rs.${lastSale.discount.toFixed(2)}\n`;
+    }
+    
+    receipt += '================================\n';
+    receipt += `TOTAL:`;
+    const totalSpaces = 32 - ('TOTAL:'.length + `Rs.${lastSale.total?.toFixed(2)}`.length);
+    receipt += ' '.repeat(Math.max(1, totalSpaces));
+    receipt += `Rs.${lastSale.total?.toFixed(2)}\n`;
+    receipt += '================================\n\n';
+    
+    receipt += 'PAYMENT:\n';
+    lastSale.payments?.forEach((payment: any) => {
+      receipt += `  ${payment.method}:`;
+      const paySpaces = 32 - (`  ${payment.method}:`.length + `Rs.${payment.amount.toFixed(2)}`.length);
+      receipt += ' '.repeat(Math.max(1, paySpaces));
+      receipt += `Rs.${payment.amount.toFixed(2)}\n`;
+    });
+    
+    if (change > 0) {
+      receipt += `  Change:`;
+      const changeSpaces = 32 - ('  Change:'.length + `Rs.${change.toFixed(2)}`.length);
+      receipt += ' '.repeat(Math.max(1, changeSpaces));
+      receipt += `Rs.${change.toFixed(2)}\n`;
+    }
+    
+    receipt += '\n================================\n';
+    receipt += '   Thank you for your purchase!\n';
+    receipt += '       Please come again\n';
+    receipt += '================================\n\n';
+    
+    // Open print window with plain text
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const receiptContent = receiptRef.current.innerHTML;
-    
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Sales Receipt</title>
+          <title>Receipt</title>
           <style>
-            * {
+            @page { 
               margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            @page {
-              size: 79mm 150mm;
-              margin: 0;
+              size: 79mm auto;
             }
             body {
               font-family: 'Courier New', monospace;
-              width: 79mm;
-              padding: 2mm;
-              font-size: 9pt;
-              line-height: 1.2;
-            }
-            .receipt-container {
-              width: 100%;
-            }
-            .header {
-              text-align: center;
-              border-bottom: 1px dashed #000;
-              padding-bottom: 1.5mm;
-              margin-bottom: 1.5mm;
-            }
-            .header h1 {
-              font-size: 12pt;
-              margin-bottom: 0.5mm;
+              font-size: 14px;
+              line-height: 1.3;
+              margin: 0;
+              padding: 3mm 3mm 0 3mm;
+              white-space: pre;
               font-weight: bold;
-            }
-            .header p {
-              font-size: 8pt;
-            }
-            .section {
-              margin-bottom: 1.5mm;
-            }
-            .section-title {
-              font-size: 7pt;
-              text-transform: uppercase;
-              margin-bottom: 0.3mm;
-              font-weight: bold;
-            }
-            .section-value {
-              font-size: 9pt;
-              font-weight: bold;
-            }
-            .items-table {
-              width: 100%;
-              font-size: 8pt;
-              margin: 1.5mm 0;
-            }
-            .items-table th {
-              text-align: left;
-              border-bottom: 1px solid #000;
-              padding-bottom: 0.5mm;
-              font-size: 7pt;
-            }
-            .items-table td {
-              padding: 0.5mm 0;
-            }
-            .text-right {
-              text-align: right;
-            }
-            .divider {
-              border-top: 1px dashed #000;
-              margin: 1.5mm 0;
-            }
-            .total-line {
-              font-size: 10pt;
-              font-weight: bold;
-              margin: 1mm 0;
             }
             .footer {
+              font-size: 11px;
               text-align: center;
-              font-size: 6pt;
               margin-top: 2mm;
-              padding-top: 1.5mm;
-              border-top: 1px dashed #000;
-              line-height: 1.3;
-            }
-            .footer p {
-              margin-bottom: 0.5mm;
-            }
-            @media print {
-              body {
-                padding: 1.5mm;
-              }
+              font-weight: 600;
+              line-height: 1.4;
             }
           </style>
         </head>
-        <body>
-          ${receiptContent}
-        </body>
+        <body><pre>${receipt}</pre><div class="footer">Software By INNOVATECH Solutions<br>0742256408</div></body>
       </html>
     `);
     
